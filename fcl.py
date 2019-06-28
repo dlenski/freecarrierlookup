@@ -89,9 +89,12 @@ for pn in args.phone_number:
     try:
         j = resp.json()
         status, html = j['status'], j['html']
-        strings = [s.strip() for s in ET.fromstring(html).itertext() if s.strip()]
-    except (ValueError, KeyError, SyntaxError):
+    except (ValueError, KeyError):
         p.error('Expected response to be JSON object containing status and html, but got:\n%s' % resp.text)
+    try:
+        strings = [s.strip() for s in ET.fromstring('<x>' + html + '</x>').itertext() if s.strip()]
+    except SyntaxError: # not XML-ish
+        strings = [html]
 
     # print results
     if status != 'success':
