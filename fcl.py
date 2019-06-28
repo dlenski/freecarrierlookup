@@ -42,12 +42,16 @@ else:
                    help='Phone number to lookup (without country code)')
     p.add_argument('--cc', type=str.strip, required=True,
                    help='Country code for all numbers')
+p.add_argument('-u', '--user-agent', help="User-Agent string (default is none)")
 args = p.parse_args()
 
 # Get initial cookie
 
 sess = Session()
-del sess.headers['User-Agent']
+if args.user_agent:
+    sess.headers['User-Agent'] = args.user_agent
+else:
+    del sess.headers['User-Agent']
 sess.headers['Accept-Language'] = 'en'
 sess.head('https://freecarrierlookup.com')
 
