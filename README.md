@@ -37,17 +37,20 @@ optional arguments:
   -E, --assume-e164     Assume E.164 format even if leading '+' not present
   -u USER_AGENT, --user-agent USER_AGENT
                         User-Agent string (default is none)
+  -r RATE_LIMIT, --rate-limit RATE_LIMIT
+			Rate limit in seconds per query (default is none)
 ```
 
 Examples
 --------
 
-Looking up Google's phone number, and KLM's phone number…
+Looking up Google's phone number, KLM's phone number, and NTT's phone number…
 
 ```
-$ ./fcl.py --cc=1 650-253-0000 +31206490787
+$ ./fcl.py --cc=1 650-253-0000 +31206490787 +811200-64337
 +1 6502530000: {'Carrier': 'Level 3 Communications, LLC', 'Is Wireless': 'n'}
 +31 206490787: {'Carrier': 'Tele2  Nederland', 'Is Wireless': 'n'}
++81 120064337: {'Carrier': 'NTT Communications', 'Is Wireless': 'n'}
 ```
 
 License

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import time
 from requests import Session
 from sys import stderr
 from xml.etree import cElementTree as ET
@@ -43,6 +44,7 @@ else:
     p.add_argument('--cc', type=str.strip, required=True,
                    help='Country code for all numbers')
 p.add_argument('-u', '--user-agent', help="User-Agent string (default is none)")
+p.add_argument('-r', '--rate-limit', type=int, help="Rate limit in seconds per query (default is none)")
 args = p.parse_args()
 
 # Get initial cookie
@@ -57,6 +59,7 @@ sess.head('https://freecarrierlookup.com')
 
 # Lookup phone numbers' carriers
 
+rate_allow = None
 for pn in args.phone_number:
     if phonenumbers:
         # parse into country code and "national number" with phonenumbers
@@ -80,6 +83,10 @@ for pn in args.phone_number:
         cc, phonenum = args.cc, ''.join(filter(str.isdigit, pn))
 
     # Request (web interface includes test=456 and sessionlogin=0, but they don't seem to be required)
+    if args.rate_limit:
+        now = time.time()
+        if rate_allow and now < rate_allow: time.sleep(rate_allow - now)
+        rate_allow = time.time() + args.rate_limit
     resp = sess.post('https://freecarrierlookup.com/getcarrier.php', {'cc':cc, 'phonenum':phonenum})
 
     # Check results
