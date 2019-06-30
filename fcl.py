@@ -66,9 +66,6 @@ for pn in args.phone_number:
         if not pn.startswith('+'):
             if args.cc: pn = '+%s %s' % (args.cc, pn)
             elif args.assume_e164: pn = '+' + pn
-            else:
-                print("WARNING: Skipping %r, which lacks an E.164 country code prefix (see --cc or -E options)" % pn, file=stderr)
-                continue
 
         try:
             obj = phonenumbers.parse(pn, region=args.region)
