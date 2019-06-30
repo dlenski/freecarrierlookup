@@ -21,9 +21,9 @@ Usage
 -----
 
 ```
-usage: freecarrierlookup [-h] [--region REGION] [--cc CC | -E] [-c]
-                         [-u USER_AGENT] [-r RATE_LIMIT]
-                         phone_number [phone_number ...]
+usage: fcl [-h] [--region REGION] [--cc CC | -E] [-c] [-u USER_AGENT]
+           [-r RATE_LIMIT]
+           phone_number [phone_number ...]
 
 Lookup carrier information using FreeCarrierLookup.com
 
@@ -49,7 +49,7 @@ Examples
 Looking up Google's phone number, Facebook's AccountKit phone number, KLM's phone number, NTT's phone number…
 
 ```
-$ freecarrierlookup --cc=1 650-253-0000 650-798-9814 +31206490787 +811200-64337
+$ fcl --cc=1 650-253-0000 650-798-9814 +31206490787 +811200-64337
 +1 6502530000: {'Carrier': 'Level 3 Communications, LLC', 'Is Wireless': 'n'}
 +1 6507989814: {'Carrier': 'Bellsouth Mobility, LLC - GA', 'Is Wireless': 'y', 'MMS Gateway Address': '6507989814@mms.att.net', 'SMS Gateway Address': '6507989814@txt.att.net'}
 +31 206490787: {'Carrier': 'Tele2  Nederland', 'Is Wireless': 'n'}
@@ -59,7 +59,7 @@ $ freecarrierlookup --cc=1 650-253-0000 650-798-9814 +31206490787 +811200-64337
 … or in CSV format:
 
 ```
-$ freecarrierlookup --csv --cc=1 650-253-0000 +31206490787 +811200-64337
+$ fcl --csv --cc=1 650-253-0000 +31206490787 +811200-64337
 Country Code,Phone Number,Carrier,Is Wireless,SMS Gateway Address,MMS Gateway Address,Extra
 1,6502530000,"Level 3 Communications, LLC",n,,,
 1,6507989814,"Bellsouth Mobility, LLC - GA",y,6507989814@txt.att.net,6507989814@mms.att.net,
