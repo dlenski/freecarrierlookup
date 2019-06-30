@@ -3,7 +3,8 @@
 
 import argparse
 import time
-from sys import stderr
+import csv
+from sys import stderr, stdout
 
 try:
     import phonenumbers
@@ -31,10 +32,14 @@ else:
                    help='Phone number to lookup (without country code)')
     p.add_argument('--cc', type=str.strip, required=True,
                    help='Country code for all numbers')
+p.add_argument('-c','--csv', action='store_true', help='Output results in CSV format')
 p.add_argument('-u', '--user-agent', help="User-Agent string (default is none)")
 p.add_argument('-r', '--rate-limit', type=int, help="Rate limit in seconds per query (default is none)")
 args = p.parse_args()
 fcl = FreeCarrierLookup(args.user_agent)
+if args.csv:
+    wr = csv.writer(stdout)
+    wr.writerow(('Country Code', 'Phone Number', 'Carrier', 'Is Wireless', 'SMS Gateway Address', 'MMS Gateway Address', 'Extra'))
 
 # Lookup phone numbers' carriers
 
@@ -72,4 +77,7 @@ for pn in args.phone_number:
     except Exception as e:
         p.error('\n'.join(e.args))
     else:
-        print('+%s %s: %s' % (cc, phonenum, results))
+        if args.csv:
+            wr.writerow((cc, phonenum, results.pop('Carrier', None), results.pop('Is Wireless', None), results.pop('SMS Gateway Address',None), results.pop('MMS Gateway Address',None), results or None))
+        else:
+            print('+%s %s: %s' % (cc, phonenum, results))

@@ -36,6 +36,7 @@ optional arguments:
   --cc CC               Default country code (if none, all numbers must be in
                         E.164 format)
   -E, --assume-e164     Assume E.164 format even if leading '+' not present
+  -c, --csv             Output results in CSV format
   -u USER_AGENT, --user-agent USER_AGENT
                         User-Agent string (default is none)
   -r RATE_LIMIT, --rate-limit RATE_LIMIT
@@ -45,13 +46,25 @@ optional arguments:
 Examples
 --------
 
-Looking up Google's phone number, KLM's phone number, and NTT's phone number…
+Looking up Google's phone number, Facebook's AccountKit phone number, KLM's phone number, NTT's phone number…
 
 ```
 $ freecarrierlookup --cc=1 650-253-0000 650-798-9814 +31206490787 +811200-64337
 +1 6502530000: {'Carrier': 'Level 3 Communications, LLC', 'Is Wireless': 'n'}
++1 6507989814: {'Carrier': 'Bellsouth Mobility, LLC - GA', 'Is Wireless': 'y', 'MMS Gateway Address': '6507989814@mms.att.net', 'SMS Gateway Address': '6507989814@txt.att.net'}
 +31 206490787: {'Carrier': 'Tele2  Nederland', 'Is Wireless': 'n'}
 +81 120064337: {'Carrier': 'NTT Communications', 'Is Wireless': 'n'}
+```
+
+… or in CSV format:
+
+```
+$ freecarrierlookup --csv --cc=1 650-253-0000 +31206490787 +811200-64337
+Country Code,Phone Number,Carrier,Is Wireless,SMS Gateway Address,MMS Gateway Address,Extra
+1,6502530000,"Level 3 Communications, LLC",n,,,
+1,6507989814,"Bellsouth Mobility, LLC - GA",y,6507989814@txt.att.net,6507989814@mms.att.net,
+31,206490787,Tele2  Nederland,n,,,
+81,120064337,NTT Communications,n,,,
 ```
 
 License
