@@ -3,26 +3,14 @@
 
 import argparse
 import time
-from requests import Session
 from sys import stderr
-from xml.etree import cElementTree as ET
 
 try:
     import phonenumbers
 except ImportError:
     phonenumbers = None
 
-# take a list like ['Phone Number:', '123', 'Carrier:', 'XYZ', 'Empty:', 'Is Wireless:', 'y']
-# and convert to a dictionary like {'Phone Number':'123', 'Carrier':'XYZ', 'Is Wireless': 'y'}
-def dictify(strings, excl=('Phone Number')):
-    k = None
-    d = {}
-    for s in strings:
-        if s.endswith(':'):
-            k = s[:-1]
-        else:
-            d[k] = (d.get(k,'') and ' ') + s
-    return {k:d[k] for k in sorted(d) if k not in excl}
+from . import FreeCarrierLookup
 
 ########################################
 
@@ -46,16 +34,7 @@ else:
 p.add_argument('-u', '--user-agent', help="User-Agent string (default is none)")
 p.add_argument('-r', '--rate-limit', type=int, help="Rate limit in seconds per query (default is none)")
 args = p.parse_args()
-
-# Get initial cookie
-
-sess = Session()
-if args.user_agent:
-    sess.headers['User-Agent'] = args.user_agent
-else:
-    del sess.headers['User-Agent']
-sess.headers['Accept-Language'] = 'en'
-sess.head('https://freecarrierlookup.com')
+fcl = FreeCarrierLookup(args.user_agent)
 
 # Lookup phone numbers' carriers
 
@@ -84,24 +63,13 @@ for pn in args.phone_number:
         now = time.time()
         if rate_allow and now < rate_allow: time.sleep(rate_allow - now)
         rate_allow = time.time() + args.rate_limit
-    resp = sess.post('https://freecarrierlookup.com/getcarrier.php', {'cc':cc, 'phonenum':phonenum})
-
-    # Check results
-    if not resp.ok:
-        p.error('Got HTTP status code %d' % resp.status_code)
 
     try:
-        j = resp.json()
-        status, html = j['status'], j['html']
-    except (ValueError, KeyError):
-        p.error('Expected response to be JSON object containing status and html, but got:\n%s' % resp.text)
-    try:
-        strings = [s.strip() for s in ET.fromstring('<x>' + html + '</x>').itertext() if s.strip()]
-    except SyntaxError: # not XML-ish
-        strings = [html]
-
-    # print results
-    if status != 'success':
+        results = fcl.lookup(cc, phonenum)
+    except RuntimeError as e:
+        status, strings = e.args
         print('%s received for +%s %s: %s' % (status.title(), cc, phonenum, ' '.join(strings)), file=stderr)
+    except Exception as e:
+        p.error('\n'.join(e.args))
     else:
-        print('+%s %s: %s' % (cc, phonenum, dictify(strings)))
+        print('+%s %s: %s' % (cc, phonenum, results))

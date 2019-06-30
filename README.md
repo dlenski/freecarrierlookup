@@ -21,8 +21,9 @@ Usage
 -----
 
 ```
-usage: fcl.py [-h] [--region REGION] [--cc CC | -E] [-u USER_AGENT]
-              phone_number [phone_number ...]
+usage: freecarrierlookup [-h] [--region REGION] [--cc CC | -E] [-c]
+                         [-u USER_AGENT] [-r RATE_LIMIT]
+                         phone_number [phone_number ...]
 
 Lookup carrier information using FreeCarrierLookup.com
 
@@ -47,7 +48,7 @@ Examples
 Looking up Google's phone number, KLM's phone number, and NTT's phone number…
 
 ```
-$ ./fcl.py --cc=1 650-253-0000 +31206490787 +811200-64337
+$ freecarrierlookup --cc=1 650-253-0000 650-798-9814 +31206490787 +811200-64337
 +1 6502530000: {'Carrier': 'Level 3 Communications, LLC', 'Is Wireless': 'n'}
 +31 206490787: {'Carrier': 'Tele2  Nederland', 'Is Wireless': 'n'}
 +81 120064337: {'Carrier': 'NTT Communications', 'Is Wireless': 'n'}
