@@ -73,6 +73,8 @@ for pn in args.phone_number:
         results = fcl.lookup(cc, phonenum)
     except RuntimeError as e:
         status, strings = e.args
+        if status == 'error' and 'quota' in strings[0]:
+            p.error('exceeded quota')
         print('%s received for +%s %s: %s' % (status.title(), cc, phonenum, ' '.join(strings)), file=stderr)
     except Exception as e:
         p.error('\n'.join(e.args))
