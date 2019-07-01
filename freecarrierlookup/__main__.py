@@ -56,6 +56,7 @@ for pn in args.phone_number:
             cc, phonenum = obj.country_code, obj.national_number
         except phonenumbers.NumberParseException as e:
             print("WARNING: Could not parse %r with phonenumbers: %s" % (pn, ' '.join(e.args)), file=stderr)
+            continue
     else:
         # use country code and phone number as-is
         if pn.startswith('+'):
@@ -77,7 +78,7 @@ for pn in args.phone_number:
             p.error('exceeded quota')
         print('%s received for +%s %s: %s' % (status.title(), cc, phonenum, ' '.join(strings)), file=stderr)
     except Exception as e:
-        p.error('\n'.join(e.args))
+        p.error('\n'.join(map(str, e.args)))
     else:
         if args.csv:
             wr.writerow((cc, phonenum, results.pop('Carrier', None), results.pop('Is Wireless', None), results.pop('SMS Gateway Address',None), results.pop('MMS Gateway Address',None), results or None))

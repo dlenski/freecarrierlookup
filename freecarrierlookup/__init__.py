@@ -44,7 +44,7 @@ class FreeCarrierLookup(object):
             status, html = j['status'], j['html']
         except (ValueError, KeyError):
             self.connected = False
-            raise ValueError('Expected response to be JSON object containing status and html', resp)
+            raise ValueError('Expected response to be JSON object containing status and html', resp.text)
 
         try:
             strings = [s.strip() for s in ET.fromstring('<x>' + html + '</x>').itertext() if s.strip()]
