@@ -53,7 +53,7 @@ for pn in args.phone_number:
 
         try:
             obj = phonenumbers.parse(pn, region=args.region)
-            cc, phonenum = obj.country_code, obj.national_number
+            cc, phonenum = obj.country_code, ('0'*(obj.number_of_leading_zeros or obj.italian_leading_zero or 0)) + str(obj.national_number)
         except phonenumbers.NumberParseException as e:
             print("WARNING: Could not parse %r with phonenumbers: %s" % (pn, ' '.join(e.args)), file=stderr)
             continue
