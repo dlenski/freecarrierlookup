@@ -1,7 +1,20 @@
-fcl.py
-======
+python-freecarrierlookup
+========================
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+This is a Python wrapper for the FreeCarrierLookup.com web service, which
+allows you to lookup the carrier and mobile/landline status of phone numbers
+in many countries.
+
+Limitations
+-----------
+
+* FreeCarrierLookup.com appears to limit each client IPv4 address to 30
+  lookups/month.
+* If this is widely-used, FCL would probably replace their (wholly
+  ineffectual) client-side CAPTCHA which is supposed to prevent automated
+  usage.
 
 Dependencies
 ------------
@@ -17,8 +30,8 @@ The `phonenumbers` module is required to parse numbers into country code and
 national numbers.  Without it you'll need to specify a single country code
 for all numbers.
 
-Usage
------
+Command-line usage
+------------------
 
 ```
 usage: fcl [-h] [--region REGION] [--cc CC | -E] [-c] [-u USER_AGENT]
@@ -43,8 +56,7 @@ optional arguments:
 			Rate limit in seconds per query (default is none)
 ```
 
-Examples
---------
+### Examples
 
 Looking up Google's phone number, Facebook's AccountKit phone number, KLM's phone number, NTT's phone number…
 
@@ -65,6 +77,27 @@ Country Code,Phone Number,Carrier,Is Wireless,SMS Gateway Address,MMS Gateway Ad
 1,6507989814,"Bellsouth Mobility, LLC - GA",y,6507989814@txt.att.net,6507989814@mms.att.net,
 31,206490787,Tele2  Nederland,n,,,
 81,120064337,NTT Communications,n,,,
+```
+
+API
+---
+
+The `FreeCarrierLookup` accepts optional two optional parameters:
+
+* `session` (can be populated with a custom `requests.Session` object)
+* `user_agent` (sets a specific user-agent string; default is not to use any)
+
+```python
+>>> import freecarrierlookup
+>>> l = freecarrierlookup.FreeCarrierLookup()
+>>> l.lookup('1', '6502530000')
+{'Carrier': 'Level 3 Communications, LLC', 'Is Wireless': 'n'}
+>>> l.lookup('12345', '999999999')
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "freecarrierlookup/__init__.py", line 55, in lookup
+    raise RuntimeError(status, strings)
+RuntimeError: ('error', ['Invalid phone number'])
 ```
 
 License
