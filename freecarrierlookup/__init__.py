@@ -17,12 +17,15 @@ def _dictify(strings, excl=('Phone Number',)):
 
 class FreeCarrierLookup(object):
     def __init__(self, user_agent=None, session=None):
-        s = self.session = session or requests.Session()
-        if user_agent:
-            s.headers['User-Agent'] = user_agent
+        if session:
+            self.session = session
         else:
-            del s.headers['User-Agent']
-        s.headers['Accept-Language'] = 'en'
+            s = self.session = requests.Session()
+            if user_agent:
+                s.headers['User-Agent'] = user_agent
+            else:
+                del s.headers['User-Agent']
+            s.headers['Accept-Language'] = 'en'
         self.connected = False
 
     def _connect(self):
