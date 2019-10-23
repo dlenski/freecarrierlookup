@@ -53,7 +53,9 @@ optional arguments:
   -u USER_AGENT, --user-agent USER_AGENT
                         User-Agent string (default is none)
   -r RATE_LIMIT, --rate-limit RATE_LIMIT
-			Rate limit in seconds per query (default is none)
+                        Rate limit in seconds per query (default is none)
+  --proxy PROXY         HTTPS proxy (in any format accepted by python-
+                        requests, e.g. socks5://localhost:8080)
 ```
 
 ### Examples
