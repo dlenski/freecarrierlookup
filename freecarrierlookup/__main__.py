@@ -87,3 +87,5 @@ for pn in args.phone_number:
             wr.writerow((cc, phonenum, results.pop('Carrier', None), results.pop('Is Wireless', None), results.pop('SMS Gateway Address',None), results.pop('MMS Gateway Address',None), results or None))
         else:
             print('+%s %s: %s' % (cc, phonenum, results))
+
+p.exit()
