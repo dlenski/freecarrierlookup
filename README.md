@@ -2,6 +2,7 @@ python-freecarrierlookup
 ========================
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Build Status](https://api.travis-ci.org/dlenski/freecarrierlookup.png)](https://travis-ci.org/dlenski/freecarrierlookup)
 
 This is a Python wrapper for the FreeCarrierLookup.com web service, which
 allows you to lookup the carrier and mobile/landline status of phone numbers

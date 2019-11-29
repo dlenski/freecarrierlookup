@@ -20,5 +20,6 @@ setup(name='freecarrierlookup',
       url="https://github.com/dlenski/freecarrierlookup",
       packages=["freecarrierlookup"],
       include_package_data = True,
-      entry_points={ 'console_scripts': [ 'fcl=freecarrierlookup.__main__' ] }
+      entry_points={ 'console_scripts': [ 'fcl=freecarrierlookup.__main__' ] },
+      test_suite='nose.collector',
       )
