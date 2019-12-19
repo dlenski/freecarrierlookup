@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import requests
+from PIL import Image
+from pytesseract import image_to_string
+
+from io import BytesIO
 from xml.etree import cElementTree as ET
 
 # take a list like ['Phone Number:', '123', 'Carrier:', 'XYZ', 'Empty:', 'Is Wireless:', 'y', 'WARNING: some limitation']
@@ -36,14 +40,21 @@ class FreeCarrierLookup(object):
     def lookup(self, cc, phonenum):
         self._connect()
 
-        # web interface includes test=456 and sessionlogin=0, but they don't seem to be required
-        resp = self.session.post('https://freecarrierlookup.com/getcarrier_free.php', {'cc':cc, 'phonenum':phonenum})
+        resp = self.session.get('https://freecarrierlookup.com/captcha/captcha.php')
+        with BytesIO(resp.content) as f:
+            im = Image.open(f)
+            captcha_question = image_to_string(im, lang='eng')
+            print("Captcha prompt: %s" % captcha_question)
+            captcha_value = input("Captcha response? ")
+
+        # web interface includes test=456, but that doesn't seem to be required
+        resp = self.session.post('https://freecarrierlookup.com/getcarrier_free.php', {'sessionlogin':1, 'cc':cc, 'phonenum':phonenum, 'captcha_entered':captcha_value})
         resp.raise_for_status()
         try:
             j = resp.json()
             status, html = j['status'], j['html']
         except (ValueError, KeyError):
-            raise ValueError('Expected response to be JSON object containing status and html', resp.text)
+            raise ValueError('Expected response to be JSON object containing status and html, but got %r' % resp.text)
 
         try:
             strings = [s.strip() for s in ET.fromstring('<x>' + html + '</x>').itertext() if s.strip()]
