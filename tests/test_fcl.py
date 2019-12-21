@@ -22,7 +22,9 @@ class test_FCL:
 
     def test_good_numbers(self):
         for name, cc, number, expected in self.good_cases:
-            results = self.fcl.lookup(cc, number)
+            _, prompt = self.fcl.get_captcha()
+            captcha = input(prompt + '? ')
+            results = self.fcl.lookup(cc, number, captcha)
             assert all(results.get(k)==v for k, v in expected.items())
 
     def test_bad_numbers(self):
