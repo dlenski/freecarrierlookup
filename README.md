@@ -61,25 +61,27 @@ optional arguments:
 
 ### Examples
 
-Looking up Google's phone number, Facebook's AccountKit phone number, KLM's phone number, NTT's phone number…
+Looking up Google's phone number, Facebook's AccountKit phone number, KLM's phone number, NTT's phone number, and the main number for the Parliament of Canada…
 
 ```
-$ fcl --cc=1 650-253-0000 650-798-9814 +31206490787 +811200-64337
+$ fcl --cc=1 650-253-0000 650-798-9814 +31206490787 +811200-64337 613-992-4793
 +1 6502530000: {'Carrier': 'Level 3 Communications, LLC', 'Is Wireless': 'n'}
 +1 6507989814: {'Carrier': 'Bellsouth Mobility, LLC - GA', 'Is Wireless': 'y', 'MMS Gateway Address': '6507989814@mms.att.net', 'SMS Gateway Address': '6507989814@txt.att.net'}
 +31 206490787: {'Carrier': 'Tele2  Nederland', 'Is Wireless': 'n'}
 +81 120064337: {'Carrier': 'NTT Communications', 'Is Wireless': 'n'}
++1 6139924793: {'Is Wireless': 'n', 'Carrier': 'Bell Canada', 'Note': 'NOTE: This result is not number-portability aware. Due to regulations in Canada, ...'}
 ```
 
 … or in CSV format:
 
 ```
 $ fcl --csv --cc=1 650-253-0000 +31206490787 +811200-64337
-Country Code,Phone Number,Carrier,Is Wireless,SMS Gateway Address,MMS Gateway Address,Extra
-1,6502530000,"Level 3 Communications, LLC",n,,,
-1,6507989814,"Bellsouth Mobility, LLC - GA",y,6507989814@txt.att.net,6507989814@mms.att.net,
-31,206490787,Tele2  Nederland,n,,,
-81,120064337,NTT Communications,n,,,
+Country Code,Phone Number,Carrier,Is Wireless,SMS Gateway Address,MMS Gateway Address,Note,Extra
+1,6502530000,"Level 3 Communications, LLC",n,,,,
+1,6507989814,"Bellsouth Mobility, LLC - GA",y,6507989814@txt.att.net,6507989814@mms.att.net,,
+31,206490787,Tele2  Nederland,n,,,,
+81,120064337,NTT Communications,n,,,,
+1,6139924793,Bell Canada,n,,,"NOTE: This result is not number-portability aware. Due to regulations in Canada, ...",
 ```
 
 API

@@ -3,16 +3,17 @@
 import requests
 from xml.etree import cElementTree as ET
 
-# take a list like ['Phone Number:', '123', 'Carrier:', 'XYZ', 'Empty:', 'Is Wireless:', 'y']
-# and convert to a dictionary like {'Phone Number':'123', 'Carrier':'XYZ', 'Is Wireless': 'y'}
+# take a list like ['Phone Number:', '123', 'Carrier:', 'XYZ', 'Empty:', 'Is Wireless:', 'y', 'WARNING: some limitation']
+# and convert to a dictionary like {'Phone Number':'123', 'Carrier':'XYZ', 'Is Wireless': 'y', 'Note': 'WARNING: some limitation'}
 def _dictify(strings, excl=('Phone Number',)):
-    k = None
+    k = 'Note' # put leftover stuff without keys under "Note"
     d = {}
     for s in strings:
         if s.endswith(':'):
             k = s[:-1]
         else:
             d[k] = (d.get(k,'') and ' ') + s
+            k = 'Note'
     return {k:d[k] for k in sorted(d) if k not in excl}
 
 class FreeCarrierLookup(object):
