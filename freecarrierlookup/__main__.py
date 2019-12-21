@@ -32,6 +32,7 @@ else:
                    help='Phone number to lookup (without country code)')
     p.add_argument('--cc', type=str.strip, required=True,
                    help='Country code for all numbers')
+p.add_argument('-o','--output', type=argparse.FileType('w'), default=stdout, help='Output file (default is stdout)')
 p.add_argument('-c','--csv', action='store_true', help='Output results in CSV format')
 p.add_argument('-u', '--user-agent', help="User-Agent string (default is none)")
 p.add_argument('-r', '--rate-limit', type=int, help="Rate limit in seconds per query (default is none)")
@@ -100,10 +101,10 @@ for pn in args.phone_number:
         else:
             if args.csv:
                 if csvwr is None:
-                    csvwr = csv.writer(stdout)
+                    csvwr = csv.writer(args.output)
                     csvwr.writerow(('Country Code', 'Phone Number', 'Carrier', 'Is Wireless', 'SMS Gateway Address', 'MMS Gateway Address', 'Note', 'Extra'))
                 csvwr.writerow((cc, phonenum, results.pop('Carrier', None), results.pop('Is Wireless', None), results.pop('SMS Gateway Address',None), results.pop('MMS Gateway Address',None), results.pop('Note',None), results or None))
             else:
-                print('+%s %s: %s' % (cc, phonenum, results))
+                print('+%s %s: %s' % (cc, phonenum, results), file=args.output)
 
 p.exit()

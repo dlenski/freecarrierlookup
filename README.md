@@ -55,6 +55,8 @@ optional arguments:
   --cc CC               Default country code (if none, all numbers must be in
                         E.164 format)
   -E, --assume-e164     Assume E.164 format even if leading '+' not present
+  -o OUTPUT, --output OUTPUT
+                        Output file (default is stdout)
   -c, --csv             Output results in CSV format
   -u USER_AGENT, --user-agent USER_AGENT
                         User-Agent string (default is none)
