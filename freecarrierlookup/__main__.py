@@ -38,11 +38,9 @@ p.add_argument('-r', '--rate-limit', type=int, help="Rate limit in seconds per q
 p.add_argument('--proxy', help='HTTPS proxy (in any format accepted by python-requests, e.g. socks5://localhost:8080)')
 args = p.parse_args()
 fcl = FreeCarrierLookup(args.user_agent)
+csvwr = None
 if args.proxy:
     fcl.session.proxies['https'] = args.proxy
-if args.csv:
-    wr = csv.writer(stdout)
-    wr.writerow(('Country Code', 'Phone Number', 'Carrier', 'Is Wireless', 'SMS Gateway Address', 'MMS Gateway Address', 'Extra'))
 
 # Lookup phone numbers' carriers
 
@@ -73,19 +71,39 @@ for pn in args.phone_number:
         if rate_allow and now < rate_allow: time.sleep(rate_allow - now)
         rate_allow = time.time() + args.rate_limit
 
-    try:
-        results = fcl.lookup(cc, phonenum)
-    except RuntimeError as e:
-        status, strings = e.args
-        if status == 'error' and 'quota' in strings[0]:
-            p.error('exceeded quota')
-        print('%s received for +%s %s: %s' % (status.title(), cc, phonenum, ' '.join(strings)), file=stderr)
-    except Exception as e:
-        p.error('\n'.join(map(str, e.args)))
-    else:
-        if args.csv:
-            wr.writerow((cc, phonenum, results.pop('Carrier', None), results.pop('Is Wireless', None), results.pop('SMS Gateway Address',None), results.pop('MMS Gateway Address',None), results or None))
+    retry = True
+    while retry:
+        retry = False
+        try:
+            im, prompt = fcl.get_captcha()
+            captcha = None
+            if prompt:
+                print("CAPTCHA prompt: %s" % prompt, file=stderr)
+                captcha = input("CAPTCHA response (leave blank to show image)? ")
+            else:
+                print("Couldn't parse CAPTCHA prompt, showing image", file=stderr)
+            if not captcha:
+                im.show()
+                captcha = input("CAPTCHA response? ")
+            results = fcl.lookup(cc, phonenum, captcha)
+        except RuntimeError as e:
+            status, strings = e.args
+            if status == 'error' and 'quota' in strings[0].lower():
+                p.error('exceeded quota')
+            elif status == 'error' and 'captcha' in strings[0].lower():
+                print('Incorrect CAPTCHA response. Retry with new CAPTCHA', file=stderr)
+                retry = True
+            else:
+                print('%s received for +%s %s: %s' % (status.title(), cc, phonenum, ' '.join(strings)), file=stderr)
+        except Exception as e:
+            p.error('\n'.join(map(str, e.args)))
         else:
-            print('+%s %s: %s' % (cc, phonenum, results))
+            if args.csv:
+                if csvwr is None:
+                    csvwr = csv.writer(stdout)
+                    csvwr.writerow(('Country Code', 'Phone Number', 'Carrier', 'Is Wireless', 'SMS Gateway Address', 'MMS Gateway Address', 'Note', 'Extra'))
+                csvwr.writerow((cc, phonenum, results.pop('Carrier', None), results.pop('Is Wireless', None), results.pop('SMS Gateway Address',None), results.pop('MMS Gateway Address',None), results.pop('Note',None), results or None))
+            else:
+                print('+%s %s: %s' % (cc, phonenum, results))
 
 p.exit()

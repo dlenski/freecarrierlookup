@@ -11,18 +11,18 @@ in many countries.
 Limitations
 -----------
 
-* FreeCarrierLookup.com appears to limit each client IPv4 address to 30
-  lookups/month.
-* If this is widely-used, FCL would probably replace their (wholly
-  ineffectual) client-side CAPTCHA which is supposed to prevent automated
-  usage.
+FreeCarrierLookup.com now requires the user to solve a
+[CAPTCHA](https://en.wikipedia.org/wiki/CAPTCHA) before each number
+looked up.  The CAPTCHA takes the form of a simple word problem
+(e.g. "how many legs does a horse have?" or "what are the last three
+letters of PIANO?") encoded as an image.
 
 Dependencies
 ------------
 
 -  Python 3.x
 -  [`requests`](https://python-requests.org)
--  (recommended) [`phonenumbers`](https://github.com/daviddrysdale/python-phonenumbers)
+-  (recommended) [`phonenumbers`](https://github.com/daviddrysdale/python-phonenumbers) and [`pytesseract`](https://github.com/madmaze/pytesseract)
 
 For development purposes, you can install the dependencies with `pip install -r requirements.txt` in
 the project root directory.
@@ -30,6 +30,11 @@ the project root directory.
 The `phonenumbers` module is required to parse numbers into country code and
 national numbers.  Without it you'll need to specify a single country code
 for all numbers.
+
+The `pytesseract` module is required to use [optical character
+recognition](https://en.wikipedia.org/wiki/CAPTCHA) to convert the
+CAPTCHA prompts to text form.  Without it you'll need to view each
+CAPTCH prompt in image form.
 
 Command-line usage
 ------------------
@@ -60,6 +65,8 @@ optional arguments:
 ```
 
 ### Examples
+
+_Note: these examples exclude the CAPTCHA prompts and responses for clarity_
 
 Looking up Google's phone number, Facebook's AccountKit phone number, KLM's phone number, NTT's phone number, and the main number for the Parliament of Canada…
 
@@ -95,9 +102,15 @@ The `FreeCarrierLookup` accepts optional two optional parameters:
 ```python
 >>> import freecarrierlookup
 >>> l = freecarrierlookup.FreeCarrierLookup()
->>> l.lookup('1', '6502530000')
+>>> image, ocr = l.get_captcha()
+>>> print(ocr)
+How many legs does a HORSE have?
+>>> l.lookup('1', '6502530000', 4)
 {'Carrier': 'Level 3 Communications, LLC', 'Is Wireless': 'n'}
->>> l.lookup('12345', '999999999')
+>>> image, ocr = l.get_captcha()
+>>> print(ocr)
+What is the plural of RAT?
+>>> l.lookup('12345', '999999999', 'RATS')
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
   File "freecarrierlookup/__init__.py", line 55, in lookup
