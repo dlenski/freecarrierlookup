@@ -8,15 +8,16 @@ if sys.version_info < (3,):
 
 ########################################
 
+with open(os.path.join(os.path.dirname(__file__), 'requirements.txt')) as r:
+    requirements = [l.strip() for l in r.readlines() if l.strip()]
+
 setup(name='freecarrierlookup',
       version='0.1',
       description=("screen-scraping interface to look up a phone number's carrier via FreeCarrierLookup.com"),
       long_description='',
       author="Daniel Lenski",
       author_email="dlenski@gmail.com",
-      install_requires=["requests",
-                        "phonenumbers",
-                        "pytesseract"],
+      install_requires=requirements,
       license='GPLv3 or later',
       url="https://github.com/dlenski/freecarrierlookup",
       packages=["freecarrierlookup"],
