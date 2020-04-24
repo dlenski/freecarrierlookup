@@ -42,9 +42,11 @@ p.add_argument('-r', '--rate-limit', type=int, help="Rate limit in seconds per q
 p.add_argument('--proxy', help='HTTPS proxy (in any format accepted by python-requests, e.g. socks5://localhost:8080)')
 args = p.parse_args()
 fcl = FreeCarrierLookup(args.user_agent)
-csvwr = None
 if args.proxy:
     fcl.session.proxies['https'] = args.proxy
+if args.csv:
+    csvwr = csv.writer(args.output)
+    csvwr.writerow(('Country Code', 'Phone Number', 'Carrier', 'Is Wireless', 'SMS Gateway Address', 'MMS Gateway Address', 'Note', 'Extra'))
 
 # Lookup phone numbers' carriers
 
@@ -110,9 +112,6 @@ for pn in args.phone_number:
             p.error('\n'.join(map(str, e.args)))
         else:
             if args.csv:
-                if csvwr is None:
-                    csvwr = csv.writer(args.output)
-                    csvwr.writerow(('Country Code', 'Phone Number', 'Carrier', 'Is Wireless', 'SMS Gateway Address', 'MMS Gateway Address', 'Note', 'Extra'))
                 csvwr.writerow((cc, phonenum, results.pop('Carrier', None), results.pop('Is Wireless', None), results.pop('SMS Gateway Address',None), results.pop('MMS Gateway Address',None), results.pop('Note',None), results or None))
             elif args.json:
                 json_output[pn] = {'Country Code':cc, 'Phone Number':phonenum, **results}
