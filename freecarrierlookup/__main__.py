@@ -4,6 +4,7 @@
 import argparse
 import time
 import csv
+import json
 from sys import stderr, stdout
 
 try:
@@ -33,7 +34,9 @@ else:
     p.add_argument('--cc', type=str.strip, required=True,
                    help='Country code for all numbers')
 p.add_argument('-o','--output', type=argparse.FileType('w'), default=stdout, help='Output file (default is stdout)')
-p.add_argument('-c','--csv', action='store_true', help='Output results in CSV format')
+x = p.add_mutually_exclusive_group()
+x.add_argument('-c','--csv', action='store_true', help='Output results in CSV format')
+x.add_argument('-j','--json', action='store_true', help='Output results in JSON format')
 p.add_argument('-u', '--user-agent', help="User-Agent string (default is none)")
 p.add_argument('-r', '--rate-limit', type=int, help="Rate limit in seconds per query (default is none)")
 p.add_argument('--proxy', help='HTTPS proxy (in any format accepted by python-requests, e.g. socks5://localhost:8080)')
@@ -55,7 +58,7 @@ for pn in args.phone_number:
 
         try:
             obj = phonenumbers.parse(pn, region=args.region)
-            cc, phonenum = obj.country_code, ('0'*(obj.number_of_leading_zeros or obj.italian_leading_zero or 0)) + str(obj.national_number)
+            cc, phonenum = str(obj.country_code), ('0'*(obj.number_of_leading_zeros or obj.italian_leading_zero or 0)) + str(obj.national_number)
         except phonenumbers.NumberParseException as e:
             print("WARNING: Could not parse %r with phonenumbers: %s" % (pn, ' '.join(e.args)), file=stderr)
             continue
@@ -73,6 +76,7 @@ for pn in args.phone_number:
         rate_allow = time.time() + args.rate_limit
 
     retry = True
+    json_output = {}
     while retry:
         retry = False
         try:
@@ -80,7 +84,8 @@ for pn in args.phone_number:
             captcha = None
             if prompt:
                 print("CAPTCHA prompt: %s" % prompt, file=stderr)
-                captcha = input("CAPTCHA response (leave blank to show image)? ")
+                print("CAPTCHA response (leave blank to show image)? ", file=stderr, end='')
+                captcha = input() # can't use prompt here, because it will go to stdout
             else:
                 print("Couldn't parse CAPTCHA prompt, showing image", file=stderr)
             if not captcha:
@@ -94,6 +99,8 @@ for pn in args.phone_number:
             elif status == 'error' and 'captcha' in strings[0].lower():
                 print('Incorrect CAPTCHA response. Retry with new CAPTCHA', file=stderr)
                 retry = True
+            elif args.json:
+                json_output[pn] = {'Country Code':cc, 'Phone Number':phonenum, status.title(): ' '.join(strings)}
             else:
                 print('%s received for +%s %s: %s' % (status.title(), cc, phonenum, ' '.join(strings)), file=stderr)
         except EOFError as e:
@@ -107,7 +114,11 @@ for pn in args.phone_number:
                     csvwr = csv.writer(args.output)
                     csvwr.writerow(('Country Code', 'Phone Number', 'Carrier', 'Is Wireless', 'SMS Gateway Address', 'MMS Gateway Address', 'Note', 'Extra'))
                 csvwr.writerow((cc, phonenum, results.pop('Carrier', None), results.pop('Is Wireless', None), results.pop('SMS Gateway Address',None), results.pop('MMS Gateway Address',None), results.pop('Note',None), results or None))
+            elif args.json:
+                json_output[pn] = {'Country Code':cc, 'Phone Number':phonenum, **results}
             else:
                 print('+%s %s: %s' % (cc, phonenum, results), file=args.output)
 
+if args.json:
+    json.dump(json_output, args.output)
 p.exit()
