@@ -96,6 +96,9 @@ for pn in args.phone_number:
                 retry = True
             else:
                 print('%s received for +%s %s: %s' % (status.title(), cc, phonenum, ' '.join(strings)), file=stderr)
+        except EOFError as e:
+            print('Got empty response. Retry with new CAPTCHA', file=stderr)
+            retry = True
         except Exception as e:
             p.error('\n'.join(map(str, e.args)))
         else:
