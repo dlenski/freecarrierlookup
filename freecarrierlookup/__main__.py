@@ -42,6 +42,7 @@ p.add_argument('-r', '--rate-limit', type=int, help="Rate limit in seconds per q
 p.add_argument('--proxy', help='HTTPS proxy (in any format accepted by python-requests, e.g. socks5://localhost:8080)')
 args = p.parse_args()
 fcl = FreeCarrierLookup(args.user_agent)
+
 if args.proxy:
     fcl.session.proxies['https'] = args.proxy
 if args.csv:

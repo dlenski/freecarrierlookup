@@ -24,4 +24,5 @@ setup(name='freecarrierlookup',
       include_package_data = True,
       entry_points={ 'console_scripts': [ 'fcl=freecarrierlookup.__main__' ] },
       test_suite='nose.collector',
+      tests_require=["nose"],
       )

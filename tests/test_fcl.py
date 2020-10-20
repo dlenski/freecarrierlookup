@@ -29,5 +29,7 @@ class test_FCL:
 
     def test_bad_numbers(self):
         for name, cc, number in self.bad_cases:
+            _, prompt = self.fcl.get_captcha()
+            captcha = input(prompt + '? ')
             with assert_raises(RuntimeError):
-                self.fcl.lookup(cc, number)
+                self.fcl.lookup(cc, number, captcha)
