@@ -21,7 +21,7 @@ from . import FreeCarrierLookup
 p = argparse.ArgumentParser(description='Lookup carrier information using FreeCarrierLookup.com')
 if phonenumbers:
     p.add_argument('phone_number', nargs='+', type=str.strip, help='Phone number to lookup')
-    p.add_argument('--region', default='US', help='libphonenumbers dialing region (default %(default)r)')
+    p.add_argument('--region', default='US', help='libphonenumber dialing region (default %(default)r)')
     x = p.add_mutually_exclusive_group()
     x.add_argument('--cc', type=str.strip,
                    help='Default country code (if none, all numbers must be in E.164 format)')
