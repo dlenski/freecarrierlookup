@@ -52,6 +52,8 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   --region REGION       libphonenumber dialing region (default 'US')
+  --no-offline          Do not include offline-estimated timezone,
+                        geolocation, and (for some countries) carrier
   --cc CC               Default country code (if none, all numbers must be in
                         E.164 format)
   -E, --assume-e164     Assume E.164 format even if leading '+' not present

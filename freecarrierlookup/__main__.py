@@ -9,10 +9,15 @@ from sys import stderr, stdout
 
 try:
     import phonenumbers
+    import phonenumbers.geocoder, phonenumbers.timezone, phonenumbers.carrier
 except ImportError:
     phonenumbers = None
 
 from . import FreeCarrierLookup
+
+standard_fields = ['Carrier', 'Is Wireless', 'SMS Gateway Address', 'MMS Gateway Address']
+offline_fields = ['Carrier', 'Geolocation', 'Timezone']
+extra_fields = ['Note', 'Extra']
 
 ########################################
 
@@ -22,6 +27,8 @@ p = argparse.ArgumentParser(description='Lookup carrier information using FreeCa
 if phonenumbers:
     p.add_argument('phone_number', nargs='+', type=str.strip, help='Phone number to lookup')
     p.add_argument('--region', default='US', help='libphonenumber dialing region (default %(default)r)')
+    p.add_argument('--no-offline', dest='offline', default=True, action='store_false',
+                   help='Do not include offline-estimated timezone, geolocation, and (for some countries) carrier')
     x = p.add_mutually_exclusive_group()
     x.add_argument('--cc', type=str.strip,
                    help='Default country code (if none, all numbers must be in E.164 format)')
@@ -41,18 +48,23 @@ p.add_argument('-u', '--user-agent', help="User-Agent string (default is none)")
 p.add_argument('-r', '--rate-limit', type=int, help="Rate limit in seconds per query (default is none)")
 p.add_argument('--proxy', help='HTTPS proxy (in any format accepted by python-requests, e.g. socks5://localhost:8080)')
 args = p.parse_args()
+if not phonenumbers:
+    args.offline = False
 fcl = FreeCarrierLookup(args.user_agent)
 
 if args.proxy:
     fcl.session.proxies['https'] = args.proxy
 if args.csv:
     csvwr = csv.writer(args.output)
-    csvwr.writerow(('Country Code', 'Phone Number', 'Carrier', 'Is Wireless', 'SMS Gateway Address', 'MMS Gateway Address', 'Note', 'Extra'))
+    csvwr.writerow(['Country Code', 'Phone Number'] + standard_fields +
+                   ([f + ' (offline)' for f in offline_fields] if args.offline else []) +
+                   extra_fields)
 
 # Lookup phone numbers' carriers
 
 rate_allow = None
 for pn in args.phone_number:
+    obj = None  # object returned by phonenumbers.parse()
     if phonenumbers:
         # parse into country code and "national number" with phonenumbers
         if not pn.startswith('+'):
@@ -112,8 +124,23 @@ for pn in args.phone_number:
         except Exception as e:
             p.error('\n'.join(map(str, e.args)))
         else:
+            if args.offline and obj:
+                c = phonenumbers.carrier.name_for_number(obj, 'en')
+                if c:
+                    results['Carrier_offline'] = c
+                geo = phonenumbers.geocoder.description_for_number(obj, 'en')
+                if geo:
+                    results['Geolocation_offline'] = geo
+                tz = phonenumbers.timezone.time_zones_for_number(obj)
+                if tz and len(tz) == 1 and tz[0] != 'Etc/Unknown':
+                    results['Timezone_offline'] = tz[0]
             if args.csv:
-                csvwr.writerow((cc, phonenum, results.pop('Carrier', None), results.pop('Is Wireless', None), results.pop('SMS Gateway Address',None), results.pop('MMS Gateway Address',None), results.pop('Note',None), results or None))
+                row = [cc, phonenum] + [results.pop(x, None) for x in standard_fields]
+                if args.offline:
+                    row += [results.pop(f + '_offline', None) for f in offline_fields]
+                row.append(results.pop('Note', None))
+                row.append(results or None)  # any leftovers as a Python dict
+                csvwr.writerow(row)
             elif args.json:
                 json_output[pn] = {'Country Code':cc, 'Phone Number':phonenum, **results}
             else:
