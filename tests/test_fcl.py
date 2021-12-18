@@ -1,5 +1,12 @@
+import os
+from json import dumps
 from freecarrierlookup import *
-from nose.tools import assert_raises
+
+import requests_mock
+from nose2.tools.such import helper
+
+with open(os.path.join(os.path.dirname(__file__), 'png-transparent.png'), 'rb') as f:
+    empty_png = f.read()
 
 class test_FCL:
     good_cases = (
@@ -20,16 +27,28 @@ class test_FCL:
     def setUp(self):
         self.fcl = FreeCarrierLookup()
 
-    def test_good_numbers(self):
-        for name, cc, number, expected in self.good_cases:
-            _, prompt = self.fcl.get_captcha()
-            captcha = input(prompt + '? ')
-            results = self.fcl.lookup(cc, number, captcha)
-            assert all(results.get(k)==v for k, v in expected.items())
+    @requests_mock.Mocker()
+    def test_good_numbers(self, m):
+        m.get('https://freecarrierlookup.com')
+        m.get('https://freecarrierlookup.com/captcha/captcha.php', content=empty_png)
 
-    def test_bad_numbers(self):
+        for name, cc, number, expected in self.good_cases:
+            html = ''.join('<b>%s:</b><p>%s</p>' % kv for kv in expected.items())
+            m.post('https://freecarrierlookup.com/getcarrier_free.php',
+                   text=dumps(dict(status='success', html=html)))
+
+            self.fcl.get_captcha()
+            results = self.fcl.lookup(cc, number, 'fake_captcha')
+            assert all(results.get(k) == v for k, v in expected.items())
+
+    @requests_mock.Mocker()
+    def test_bad_numbers(self, m):
+        m.get('https://freecarrierlookup.com')
+        m.get('https://freecarrierlookup.com/captcha/captcha.php', content=empty_png)
+        m.post('https://freecarrierlookup.com/getcarrier_free.php',
+               text=dumps(dict(status='error', html='Invalid phone number')))
+
         for name, cc, number in self.bad_cases:
-            _, prompt = self.fcl.get_captcha()
-            captcha = input(prompt + '? ')
-            with assert_raises(RuntimeError):
-                self.fcl.lookup(cc, number, captcha)
+            self.fcl.get_captcha()
+            with helper.assertRaises(RuntimeError):
+                self.fcl.lookup(cc, number, 'fake_captcha')
