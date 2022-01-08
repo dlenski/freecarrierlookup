@@ -2,7 +2,7 @@ python-freecarrierlookup
 ========================
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Build Status](https://api.travis-ci.org/dlenski/freecarrierlookup.png)](https://travis-ci.org/dlenski/freecarrierlookup)
+[![Build Status](https://github.com/dlenski/freecarrierlookup/workflows/build_and_test/badge.svg)](https://github.com/dlenski/freecarrierlookup/actions/workflows/build_and_test.yml)
 
 This is a Python wrapper for the FreeCarrierLookup.com web service, which
 allows you to lookup the carrier and mobile/landline status of phone numbers
@@ -34,7 +34,7 @@ for all numbers.
 The `pytesseract` module is required to use [optical character
 recognition](https://en.wikipedia.org/wiki/CAPTCHA) to convert the
 CAPTCHA prompts to text form.  Without it you'll need to view each
-CAPTCH prompt in image form.
+CAPTCHA prompt in image form.
 
 Command-line usage
 ------------------

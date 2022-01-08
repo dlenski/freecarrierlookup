@@ -52,7 +52,12 @@ class FreeCarrierLookup(object):
         resp.raise_for_status()
         with BytesIO(resp.content) as f:
             im = Image.open(f)
-            s = image_to_string(im, lang='eng') if image_to_string else None
+            s = None
+            if image_to_string:
+                try:
+                    s = image_to_string(im, lang='eng')
+                except:
+                    pass
         self.captchaed = True
         return im, s
 
