@@ -52,3 +52,15 @@ class test_FCL:
             self.fcl.get_captcha()
             with helper.assertRaises(RuntimeError):
                 self.fcl.lookup(cc, number, 'fake_captcha')
+
+    @requests_mock.Mocker()
+    def test_empty_response(self, m):
+        m.get('https://freecarrierlookup.com')
+        m.get('https://freecarrierlookup.com/captcha/captcha.php', content=empty_png)
+        m.post('https://freecarrierlookup.com/getcarrier_free.php',
+               text='')
+
+        self.fcl.get_captcha()
+        with helper.assertRaises(EOFError):
+            self.fcl.lookup('fake_cc', 'fake_num', 'fake_captcha')
+                
