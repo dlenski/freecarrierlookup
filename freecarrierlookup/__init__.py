@@ -10,18 +10,20 @@ except ImportError:
 from io import BytesIO
 from xml.etree import cElementTree as ET
 
+
 # take a list like ['Phone Number:', '123', 'Carrier:', 'XYZ', 'Empty:', 'Is Wireless:', 'y', 'WARNING: some limitation']
 # and convert to a dictionary like {'Phone Number':'123', 'Carrier':'XYZ', 'Is Wireless': 'y', 'Note': 'WARNING: some limitation'}
 def _dictify(strings, excl=('Phone Number',)):
-    k = 'Note' # put leftover stuff without keys under "Note"
+    k = 'Note'  # put leftover stuff without keys under "Note"
     d = {}
     for s in strings:
         if s.endswith(':'):
             k = s[:-1]
         else:
-            d[k] = (d.get(k,'') and ' ') + s
+            d[k] = (d.get(k, '') and ' ') + s
             k = 'Note'
-    return {k:d[k] for k in sorted(d) if k not in excl}
+    return {k: d[k] for k in sorted(d) if k not in excl}
+
 
 class FreeCarrierLookup(object):
     def __init__(self, user_agent=None, session=None):
@@ -56,7 +58,7 @@ class FreeCarrierLookup(object):
             if image_to_string:
                 try:
                     s = image_to_string(im, lang='eng')
-                except:
+                except Exception as e:
                     pass
         self.captchaed = True
         return im, s
@@ -67,7 +69,8 @@ class FreeCarrierLookup(object):
             raise RuntimeError('error', ('must fetch CAPTCHA before every lookup',))
 
         # web interface includes test=456, but that doesn't seem to be required
-        resp = self.session.post('https://freecarrierlookup.com/getcarrier_free.php', {'sessionlogin':1, 'cc':cc, 'phonenum':phonenum, 'captcha_entered':captcha_entered})
+        resp = self.session.post('https://freecarrierlookup.com/getcarrier_free.php',
+                                 {'sessionlogin': 1, 'cc': cc, 'phonenum': phonenum, 'captcha_entered': captcha_entered})
         resp.raise_for_status()
         try:
             j = resp.json()
@@ -82,7 +85,7 @@ class FreeCarrierLookup(object):
 
         try:
             strings = [s.strip() for s in ET.fromstring('<x>' + html + '</x>').itertext() if s.strip()]
-        except SyntaxError: # not XML-ish
+        except SyntaxError:  # not XML-ish
             strings = [html]
 
         if status != 'success':
