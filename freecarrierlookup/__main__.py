@@ -68,19 +68,19 @@ for pn in args.phone_number:
     if phonenumbers:
         # parse into country code and "national number" with phonenumbers
         if not pn.startswith('+'):
-            if args.cc: pn = '+%s %s' % (args.cc, pn)
+            if args.cc: pn = f'+{args.cc} {pn}'
             elif args.assume_e164: pn = '+' + pn
 
         try:
             obj = phonenumbers.parse(pn, region=args.region)
             cc, phonenum = str(obj.country_code), ('0' * (obj.number_of_leading_zeros or obj.italian_leading_zero or 0)) + str(obj.national_number)
         except phonenumbers.NumberParseException as e:
-            print("WARNING: Could not parse %r with phonenumbers: %s" % (pn, ' '.join(e.args)), file=stderr)
+            print(f"WARNING: Could not parse {pn!r} with phonenumbers: {' '.join(e.args)}", file=stderr)
             continue
     else:
         # use country code and phone number as-is
         if pn.startswith('+'):
-            print("WARNING: Skipping %r, which has an E.164 country code prefix (can't parse without phonenumbers module)" % pn, file=stderr)
+            print(f"WARNING: Skipping {pn!r}, which has an E.164 country code prefix (can't parse without phonenumbers module)", file=stderr)
             continue
         cc, phonenum = args.cc, ''.join(filter(str.isdigit, pn))
 
@@ -98,7 +98,7 @@ for pn in args.phone_number:
             im, prompt = fcl.get_captcha()
             captcha = None
             if prompt:
-                print("CAPTCHA prompt: %s" % prompt, file=stderr)
+                print(f"CAPTCHA prompt: {prompt}", file=stderr)
                 print("CAPTCHA response (leave blank to show image)? ", file=stderr, end='')
                 captcha = input()  # can't use prompt here, because it will go to stdout
             else:
@@ -117,7 +117,7 @@ for pn in args.phone_number:
             elif args.json:
                 json_output[pn] = {'Country Code': cc, 'Phone Number': phonenum, status.title(): ' '.join(strings)}
             else:
-                print('%s received for +%s %s: %s' % (status.title(), cc, phonenum, ' '.join(strings)), file=stderr)
+                print(f"{status.title()} received for +{cc} {phonenum}: {' '.join(strings)}", file=stderr)
         except EOFError as e:
             print('Got empty response. Retry with new CAPTCHA', file=stderr)
             retry = True
@@ -144,7 +144,7 @@ for pn in args.phone_number:
             elif args.json:
                 json_output[pn] = {'Country Code': cc, 'Phone Number': phonenum, **results}
             else:
-                print('+%s %s: %s' % (cc, phonenum, results), file=args.output)
+                print(f'+{cc} {phonenum}: {results}', file=args.output)
 
 if args.json:
     json.dump(json_output, args.output)

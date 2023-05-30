@@ -78,7 +78,7 @@ class FreeCarrierLookup(object):
         except (ValueError, KeyError):
             if resp.text in (None, ''):
                 raise EOFError()
-            raise ValueError('Expected response to be JSON object containing status and html, but got %r' % resp.text)
+            raise ValueError(f'Expected response to be JSON object containing status and html, but got {resp.text!r}')
         finally:
             # need to renew cookies and get a new CAPTCHA before every lookup
             self.connected = self.captchaed = False

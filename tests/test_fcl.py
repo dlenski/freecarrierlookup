@@ -33,7 +33,7 @@ class test_FCL:
         m.get('https://freecarrierlookup.com/captcha/captcha.php', content=empty_png)
 
         for name, cc, number, expected in self.good_cases:
-            html = ''.join('<b>%s:</b><p>%s</p>' % kv for kv in expected.items())
+            html = ''.join(f'<b>{k}:</b><p>{v}</p>' for (k, v) in expected.items())
             m.post('https://freecarrierlookup.com/getcarrier_free.php',
                    text=dumps(dict(status='success', html=html)))
 
