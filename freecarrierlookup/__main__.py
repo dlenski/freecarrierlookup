@@ -7,6 +7,10 @@ import csv
 import json
 from sys import stderr, stdout
 
+import logging
+import requests
+from http.client import HTTPConnection
+
 try:
     import phonenumbers
     import phonenumbers.geocoder, phonenumbers.timezone, phonenumbers.carrier
@@ -47,10 +51,19 @@ x.add_argument('-j', '--json', action='store_true', help='Output results in JSON
 p.add_argument('-u', '--user-agent', help="User-Agent string (default is none)")
 p.add_argument('-r', '--rate-limit', type=int, help="Rate limit in seconds per query (default is none)")
 p.add_argument('--proxy', help='HTTPS proxy (in any format accepted by python-requests, e.g. socks5://localhost:8080)')
+p.add_argument('--debug', action='count', help='HTTP request debugging')
 args = p.parse_args()
 if not phonenumbers:
     args.offline = False
 fcl = FreeCarrierLookup(args.user_agent)
+
+if args.debug:
+    HTTPConnection.debuglevel = 1
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.DEBUG)
+    requests_log = logging.getLogger('requests.packages.urllib3')
+    requests_log.setLevel(logging.DEBUG)
+    requests_log.propagate = True
 
 if args.proxy:
     fcl.session.proxies['https'] = args.proxy
