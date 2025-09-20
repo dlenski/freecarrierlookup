@@ -1,3 +1,5 @@
+_This library no longer works. FreeCarrierLookup.com now uses CloudFlare (probably with anti-bot TLS fingerprinting) rather than an explicit CAPTCHA._
+
 python-freecarrierlookup
 ========================
 
